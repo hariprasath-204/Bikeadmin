@@ -89,7 +89,7 @@ const processFeatures = async (bikeId, featuresString) => {
 
 // --- ROOT ---
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "admin.html"));
+    res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // --- DASHBOARD ---
