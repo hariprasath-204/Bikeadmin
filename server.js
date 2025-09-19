@@ -86,7 +86,7 @@ const processFeatures = async (bikeId, featuresString) => {
 // ----------------------
 // API Endpoints
 // ----------------------
-
+app.use(express.static(__dirname));
 // Root Route → Send index.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
