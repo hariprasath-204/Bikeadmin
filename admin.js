@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const sections = document.querySelectorAll(".page-section");
     const navLinks = document.querySelectorAll(".nav-links a");
     const editBikeModal = new bootstrap.Modal(document.getElementById("editBikeModal"));
-    const uploadImagesModal = new bootstrap.Modal(document.getElementById("uploadImagesModal"));
+    const uploadImagesModal = new bootstrap.Modal(document.getElementById("uploadImagesModal")); // Ensure modal HTML exists
     let categoriesCache = [];
 
     // --- Navigation ---
@@ -74,7 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    const renderBikeRow = (bike) => {
+    // Helper function to render a single bike row's content
+    const renderBikeRowContent = (bike) => {
         return `
             <td>${bike.id}</td>
             <td>${bike.category_name || 'N/A'}</td>
@@ -94,18 +95,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const loadBikes = async () => {
         const bikes = await fetchData("bikes");
         const tbody = document.getElementById("bikesTableBody");
-        tbody.innerHTML = bikes.map(b => `<tr id="bike-row-${b.id}">${renderBikeRow(b)}</tr>`).join('');
-    };
-
-    const createStatusDropdown = (id, currentStatus, type) => {
-        const statuses = ['pending', 'confirmed', 'completed', 'cancelled'];
-        return `
-            <select class="form-select form-select-sm" data-action="update-status" data-id="${id}" data-type="${type}">
-                ${statuses.map(s => `<option value="${s}" ${currentStatus === s ? 'selected' : ''}>${s.charAt(0).toUpperCase() + s.slice(1)}</option>`).join('')}
-            </select>`;
+        tbody.innerHTML = bikes.map(b => `<tr id="bike-row-${b.id}">${renderBikeRowContent(b)}</tr>`).join('');
     };
     
-    // ... Other data loaders for bookings and contacts ...
+    // ... other loaders like loadAndRenderBookings, etc. ...
 
     // --- Form Submissions & Event Delegation ---
     const handleFormSubmit = async (url, method, body, isFormData = false) => {
@@ -116,17 +109,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 options.body = JSON.stringify(body);
             }
             const response = await fetch(url, options);
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.error || 'Request failed');
-            }
-            // Handle cases where there might be no JSON body in response
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.indexOf("application/json") !== -1) {
-                return await response.json();
-            }
-            return { success: true };
-
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'Request failed');
+            return result;
         } catch (error) {
             console.error(`Error with ${method} ${url}:`, error);
             alert(`Error: ${error.message}`);
@@ -134,7 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // ✅ FINAL VERSION: This listener now instantly adds the new bike row to the table.
     document.getElementById("addBikeForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -147,13 +131,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const tbody = document.getElementById("bikesTableBody");
             const newRow = document.createElement('tr');
             newRow.id = `bike-row-${newBike.id}`;
-            newRow.innerHTML = renderBikeRow(newBike);
+            newRow.innerHTML = renderBikeRowContent(newBike);
 
-            tbody.prepend(newRow); // Add new bike to the top of the table
-            loadDashboard(); // Update dashboard counts
+            tbody.prepend(newRow);
+            loadDashboard();
         }
     });
 
+    // Make sure your modal form in HTML has this ID
     document.getElementById("uploadImagesFormModal").addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -173,8 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (result && result.success) {
             alert("Bike updated successfully!");
             editBikeModal.hide();
-            // Since we don't get the updated bike object back, we reload the whole list
-            loadBikes();
+            loadBikes(); // Reload list to show updated info
         }
     });
 
@@ -188,8 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (action === "delete-user") {
             if (confirm(`Delete user #${id}?`)) {
                 if (await handleFormSubmit(`${API_BASE_URL}/api/users/${id}`, 'DELETE')) {
-                     loadUsers();
-                     loadDashboard();
+                    document.querySelector(`#usersTableBody tr`)?.remove(); // Simplified removal
+                    loadDashboard();
                 }
             }
         }
@@ -229,8 +213,8 @@ document.addEventListener("DOMContentLoaded", () => {
             uploadImagesModal.show();
         }
     });
-
-    // ... Other event listeners for booking status changes ...
+    
+    // ... Event listener for booking status changes ...
 
     // --- Initial Load ---
     const initialize = () => {
@@ -239,10 +223,10 @@ document.addEventListener("DOMContentLoaded", () => {
         loadUsers();
         loadCategories();
         loadBikes();
-        // loadTestDrives();
-        // loadServiceBookings();
-        // loadBikeBookings();
-        // loadContacts();
+        loadTestDrives();
+        loadServiceBookings();
+        loadBikeBookings();
+        loadContacts();
     };
 
     initialize();
