@@ -4,164 +4,206 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>R.K. Bikes Admin Panel</title>
-  <!-- Corrected the path to the favicon -->
   <link rel="icon" type="image/png" href="/images/bajaj-icon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
 
-<!-- Header with Sidebar Navigation -->
-<header class="admin-header">
-  <h1 class="text-center py-3">R.K. Bikes Admin Panel</h1>
-  <nav class="nav">
+<!-- Sidebar Navigation -->
+<aside class="admin-sidebar">
+    <div class="sidebar-header">
+        R.K. Bikes
+    </div>
     <ul class="nav-links">
-      <li><a href="#dashboardSection" class="active">Dashboard</a></li>
-      <li><a href="#usersSection">Users</a></li>
-      <li><a href="#bikesSection">Bikes</a></li>
-      <li><a href="#testdriveSection">Test Drives</a></li>
-      <li><a href="#serviceBookingsSection">Service Bookings</a></li>
-      <li><a href="#bookingsSection">Bike Bookings</a></li>
-      <li><a href="#contactsSection">Contact Messages</a></li>
+        <li><a href="#dashboardSection" class="active"><i class="fas fa-tachometer-alt fa-fw me-2"></i>Dashboard</a></li>
+        <li><a href="#usersSection"><i class="fas fa-users fa-fw me-2"></i>Users</a></li>
+        <li><a href="#bikesSection"><i class="fas fa-motorcycle fa-fw me-2"></i>Bikes</a></li>
+        <li><a href="#testdriveSection"><i class="fas fa-road fa-fw me-2"></i>Test Drives</a></li>
+        <li><a href="#serviceBookingsSection"><i class="fas fa-tools fa-fw me-2"></i>Service Bookings</a></li>
+        <li><a href="#bookingsSection"><i class="fas fa-file-invoice-dollar fa-fw me-2"></i>Bike Bookings</a></li>
+        <li><a href="#contactsSection"><i class="fas fa-envelope fa-fw me-2"></i>Contact Messages</a></li>
     </ul>
-  </nav>
-</header>
+</aside>
 
 <!-- Main Content -->
-<div class="main-content container-fluid p-4">
+<main class="main-content">
+  <header class="main-header">
+    <button class="sidebar-toggle" id="sidebarToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+    <h1>Admin Panel</h1>
+  </header>
+  
+  <div class="content-wrapper">
+    <!-- Dashboard Section -->
+    <section id="dashboardSection" class="page-section active">
+      <h2>Dashboard</h2>
+      <div class="row text-center">
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5>Total Users</h5><h3 id="totalUsers">0</h3></div></div>
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5>Total Bikes</h5><h3 id="totalBikes">0</h3></div></div>
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5>Test Drives</h5><h3 id="totalTestDrives">0</h3></div></div>
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5>Service Bookings</h5><h3 id="totalServiceBookings">0</h3></div></div>
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5>Bike Bookings</h5><h3 id="totalBikeBookings">0</h3></div></div>
+        <div class="col-lg-4 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5>Contact Messages</h5><h3 id="totalContacts">0</h3></div></div>
+      </div>
 
-  <!-- Dashboard Section -->
-  <section id="dashboardSection" class="page-section active">
-    <h2>Dashboard</h2>
-    <div class="row text-center">
-      <div class="col-md-4 mb-3"><div class="card p-3 shadow"><h5>Total Users</h5><h3 id="totalUsers">0</h3></div></div>
-      <div class="col-md-4 mb-3"><div class="card p-3 shadow"><h5>Total Bikes</h5><h3 id="totalBikes">0</h3></div></div>
-      <div class="col-md-4 mb-3"><div class="card p-3 shadow"><h5>Test Drives</h5><h3 id="totalTestDrives">0</h3></div></div>
-      <div class="col-md-4 mb-3"><div class="card p-3 shadow"><h5>Service Bookings</h5><h3 id="totalServiceBookings">0</h3></div></div>
-      <div class="col-md-4 mb-3"><div class="card p-3 shadow"><h5>Bike Bookings</h5><h3 id="totalBikeBookings">0</h3></div></div>
-      <div class="col-md-4 mb-3"><div class="card p-3 shadow"><h5>Contact Messages</h5><h3 id="totalContacts">0</h3></div></div>
-    </div>
-  </section>
+      <h3 class="mt-5">Booking Status Overview</h3>
+      <div class="row text-center">
+        <div class="col-lg-3 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5 class="text-warning">Pending</h5><h3 id="totalPending">0</h3></div></div>
+        <div class="col-lg-3 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5 class="text-primary">Confirmed</h5><h3 id="totalConfirmed">0</h3></div></div>
+        <div class="col-lg-3 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5 class="text-success">Completed</h5><h3 id="totalCompleted">0</h3></div></div>
+        <div class="col-lg-3 col-md-6 mb-4"><div class="card p-3 shadow-sm"><h5 class="text-danger">Cancelled</h5><h3 id="totalCancelled">0</h3></div></div>
+      </div>
 
-  <!-- Users Section -->
-  <section id="usersSection" class="page-section">
-    <h2>Users</h2>
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped">
-        <thead>
-          <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Gender</th><th>Role</th><th>Created At</th><th>Actions</th></tr>
-        </thead>
-        <tbody id="usersTableBody"></tbody>
-      </table>
-    </div>
-  </section>
+      <h3 class="mt-4">Recent Test Drive Requests</h3>
+      <div class="table-responsive dashboard-table">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Bike</th><th>Date</th><th>Status</th></tr>
+          </thead>
+          <tbody id="recentTestDrivesTableBody"></tbody>
+        </table>
+      </div>
+    </section>
 
-  <!-- Bikes Section -->
-  <section id="bikesSection" class="page-section">
-    <h2>Bikes</h2>
-    <div class="accordion" id="bikeManagementAccordion">
-        <!-- Add New Bike -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                    Add New Bike
-                </button>
-            </h2>
-            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#bikeManagementAccordion">
-                <div class="accordion-body">
-                    <form id="addBikeForm">
-                        <div class="row g-3">
-                            <div class="col-md-4"><label class="form-label">Category</label><select class="form-select" name="category_id" id="bikeCategoryAdd" required></select></div>
-                            <div class="col-md-4"><label class="form-label">Bike Name</label><input type="text" class="form-control" name="name" required></div>
-                            <div class="col-md-4"><label class="form-label">Price</label><input type="text" class="form-control" name="price"></div>
-                            <div class="col-md-4"><label class="form-label">Engine</label><input type="text" class="form-control" name="engine"></div>
-                            <div class="col-md-4"><label class="form-label">Mileage</label><input type="text" class="form-control" name="mileage"></div>
-                            <div class="col-md-4"><label class="form-label">Thumbnail Image</label><input type="file" class="form-control" name="thumbnailFile" accept="image/*" required></div>
-                            <div class="col-md-12"><label class="form-label">Features (comma-separated)</label><input type="text" class="form-control" name="features" placeholder="e.g. Dual-Channel ABS, Bluetooth Connectivity"></div>
-                        </div>
-                        <button type="submit" class="btn btn-success mt-3">Add Bike</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <hr>
-    <h4>Existing Bikes</h4>
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped">
-        <thead>
-          <tr><th>ID</th><th>Category</th><th>Name</th><th>Price</th><th>Engine</th><th>Mileage</th><th>Image</th><th>Action</th></tr>
-        </thead>
-        <tbody id="bikesTableBody"></tbody>
-      </table>
-    </div>
-  </section>
+    <!-- Users Section -->
+    <section id="usersSection" class="page-section">
+      <h2>Users</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Gender</th><th>Role</th><th>Created At</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </section>
 
-  <!-- ... (rest of the HTML for bookings and contacts remains the same) ... -->
+    <!-- Bikes Section -->
+    <section id="bikesSection" class="page-section">
+      <h2>Manage Bikes</h2>
+      <div class="accordion" id="bikeManagementAccordion">
+          <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Add New Bike
+                  </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#bikeManagementAccordion">
+                  <div class="accordion-body">
+                      <form id="addBikeForm">
+                          <div class="row g-3">
+                              <div class="col-md-4"><label class="form-label">Category</label><select class="form-select" name="category_id" id="bikeCategoryAdd" required></select></div>
+                              <div class="col-md-4"><label class="form-label">Bike Name</label><input type="text" class="form-control" name="name" required></div>
+                              <div class="col-md-4"><label class="form-label">Price</label><input type="text" class="form-control" name="price"></div>
+                              <div class="col-md-4"><label class="form-label">Engine</label><input type="text" class="form-control" name="engine"></div>
+                              <div class="col-md-4"><label class="form-label">Mileage</label><input type="text" class="form-control" name="mileage"></div>
+                              <div class="col-md-4"><label class="form-label">Thumbnail Image</label><input type="file" class="form-control" name="thumbnailFile" accept="image/*" required></div>
+                              <div class="col-md-12"><label class="form-label">Features (comma-separated)</label><input type="text" class="form-control" name="features" placeholder="e.g. Dual-Channel ABS, Bluetooth Connectivity"></div>
+                          </div>
+                          <button type="submit" class="btn btn-success mt-3">Add Bike</button>
+                      </form>
+                  </div>
+              </div>
+          </div>
+          <div class="accordion-item">
+              <h2 class="accordion-header" id="headingTwo">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                      Upload Additional Bike Images
+                  </button>
+              </h2>
+              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#bikeManagementAccordion">
+                  <div class="accordion-body">
+                      <form id="uploadImagesForm">
+                          <div class="row g-3">
+                            <div class="col-md-6"><label class="form-label">Bike ID:</label><input type="number" name="bikeId" class="form-control" required/></div>
+                            <div class="col-md-6"><label class="form-label">Choose Images:</label><input type="file" name="images" multiple class="form-control" required/></div>
+                          </div>
+                          <button type="submit" class="btn btn-primary mt-3">Upload Images</button>
+                      </form>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <hr>
+      <h4>Existing Bikes</h4>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr><th>ID</th><th>Category</th><th>Name</th><th>Price</th><th>Engine</th><th>Mileage</th><th>Image</th><th>Action</th></tr>
+          </thead>
+          <tbody id="bikesTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- Test Drives -->
-  <section id="testdriveSection" class="page-section">
-      <h2>Test Drive Bookings</h2>
-      <ul class="nav nav-tabs" id="testdriveTab" role="tablist">
-          <li class="nav-item" role="presentation"><button class="nav-link active" id="td-pending-tab" data-bs-toggle="tab" data-bs-target="#td-pending" type="button" role="tab">Pending</button></li>
-          <li class="nav-item" role="presentation"><button class="nav-link" id="td-confirmed-tab" data-bs-toggle="tab" data-bs-target="#td-confirmed" type="button" role="tab">Confirmed</button></li>
-          <li class="nav-item" role="presentation"><button class="nav-link" id="td-completed-tab" data-bs-toggle="tab" data-bs-target="#td-completed" type="button" role="tab">Completed</button></li>
-          <li class="nav-item" role="presentation"><button class="nav-link" id="td-cancelled-tab" data-bs-toggle="tab" data-bs-target="#td-cancelled" type="button" role="tab">Cancelled</button></li>
-      </ul>
-      <div class="tab-content" id="testdriveTabContent">
-          <div class="tab-pane fade show active" id="td-pending" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Email</th><th>Bike</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody id="testdriveTableBodyPending"></tbody></table></div></div>
-          <div class="tab-pane fade" id="td-confirmed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Email</th><th>Bike</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody id="testdriveTableBodyConfirmed"></tbody></table></div></div>
-          <div class="tab-pane fade" id="td-completed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Email</th><th>Bike</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody id="testdriveTableBodyCompleted"></tbody></table></div></div>
-          <div class="tab-pane fade" id="td-cancelled" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Email</th><th>Bike</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody id="testdriveTableBodyCancelled"></tbody></table></div></div>
-      </div>
-  </section>
+    <section id="testdriveSection" class="page-section">
+        <h2>Test Drive Bookings</h2>
+        <ul class="nav nav-tabs" id="testdriveTab" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" id="td-pending-tab" data-bs-toggle="tab" data-bs-target="#td-pending" type="button" role="tab">Pending</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="td-confirmed-tab" data-bs-toggle="tab" data-bs-target="#td-confirmed" type="button" role="tab">Confirmed</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="td-completed-tab" data-bs-toggle="tab" data-bs-target="#td-completed" type="button" role="tab">Completed</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="td-cancelled-tab" data-bs-toggle="tab" data-bs-target="#td-cancelled" type="button" role="tab">Cancelled</button></li>
+        </ul>
+        <div class="tab-content" id="testdriveTabContent">
+            <div class="tab-pane fade show active" id="td-pending" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Email</th><th>Bike</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody id="testdriveTableBodyPending"></tbody></table></div></div>
+            <div class="tab-pane fade" id="td-confirmed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Email</th><th>Bike</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody id="testdriveTableBodyConfirmed"></tbody></table></div></div>
+            <div class="tab-pane fade" id="td-completed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Email</th><th>Bike</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody id="testdriveTableBodyCompleted"></tbody></table></div></div>
+            <div class="tab-pane fade" id="td-cancelled" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Mobile</th><th>Email</th><th>Bike</th><th>Date</th><th>Time</th><th>Status</th></tr></thead><tbody id="testdriveTableBodyCancelled"></tbody></table></div></div>
+        </div>
+    </section>
 
-  <!-- Service Bookings -->
-  <section id="serviceBookingsSection" class="page-section">
-      <h2>Service Bookings</h2>
-       <ul class="nav nav-tabs" id="serviceTab" role="tablist">
-          <li class="nav-item" role="presentation"><button class="nav-link active" id="sb-pending-tab" data-bs-toggle="tab" data-bs-target="#sb-pending" type="button" role="tab">Pending</button></li>
-          <li class="nav-item" role="presentation"><button class="nav-link" id="sb-confirmed-tab" data-bs-toggle="tab" data-bs-target="#sb-confirmed" type="button" role="tab">Confirmed</button></li>
-          <li class="nav-item" role="presentation"><button class="nav-link" id="sb-completed-tab" data-bs-toggle="tab" data-bs-target="#sb-completed" type="button" role="tab">Completed</button></li>
-          <li class="nav-item" role="presentation"><button class="nav-link" id="sb-cancelled-tab" data-bs-toggle="tab" data-bs-target="#sb-cancelled" type="button" role="tab">Cancelled</button></li>
-      </ul>
-       <div class="tab-content" id="serviceTabContent">
-          <div class="tab-pane fade show active" id="sb-pending" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Bike Model</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody id="serviceBookingsTableBodyPending"></tbody></table></div></div>
-          <div class="tab-pane fade" id="sb-confirmed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Bike Model</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody id="serviceBookingsTableBodyConfirmed"></tbody></table></div></div>
-          <div class="tab-pane fade" id="sb-completed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Bike Model</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody id="serviceBookingsTableBodyCompleted"></tbody></table></div></div>
-          <div class="tab-pane fade" id="sb-cancelled" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Bike Model</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody id="serviceBookingsTableBodyCancelled"></tbody></table></div></div>
-      </div>
-  </section>
+    <!-- Service Bookings -->
+    <section id="serviceBookingsSection" class="page-section">
+        <h2>Service Bookings</h2>
+         <ul class="nav nav-tabs" id="serviceTab" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" id="sb-pending-tab" data-bs-toggle="tab" data-bs-target="#sb-pending" type="button" role="tab">Pending</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="sb-confirmed-tab" data-bs-toggle="tab" data-bs-target="#sb-confirmed" type="button" role="tab">Confirmed</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="sb-completed-tab" data-bs-toggle="tab" data-bs-target="#sb-completed" type="button" role="tab">Completed</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="sb-cancelled-tab" data-bs-toggle="tab" data-bs-target="#sb-cancelled" type="button" role="tab">Cancelled</button></li>
+        </ul>
+         <div class="tab-content" id="serviceTabContent">
+            <div class="tab-pane fade show active" id="sb-pending" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Bike Model</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody id="serviceBookingsTableBodyPending"></tbody></table></div></div>
+            <div class="tab-pane fade" id="sb-confirmed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Bike Model</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody id="serviceBookingsTableBodyConfirmed"></tbody></table></div></div>
+            <div class="tab-pane fade" id="sb-completed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Bike Model</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody id="serviceBookingsTableBodyCompleted"></tbody></table></div></div>
+            <div class="tab-pane fade" id="sb-cancelled" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Name</th><th>Bike Model</th><th>Service</th><th>Date</th><th>Status</th></tr></thead><tbody id="serviceBookingsTableBodyCancelled"></tbody></table></div></div>
+        </div>
+    </section>
 
-  <!-- Bike Bookings -->
-  <section id="bookingsSection" class="page-section">
-      <h2>Bike Bookings</h2>
-      <ul class="nav nav-tabs" id="bikeBookingsTab" role="tablist">
-          <li class="nav-item" role="presentation"><button class="nav-link active" id="bb-pending-tab" data-bs-toggle="tab" data-bs-target="#bb-pending" type="button" role="tab">Pending</button></li>
-          <li class="nav-item" role="presentation"><button class="nav-link" id="bb-confirmed-tab" data-bs-toggle="tab" data-bs-target="#bb-confirmed" type="button" role="tab">Confirmed</button></li>
-          <li class="nav-item" role="presentation"><button class="nav-link" id="bb-completed-tab" data-bs-toggle="tab" data-bs-target="#bb-completed" type="button" role="tab">Completed</button></li>
-          <li class="nav-item" role="presentation"><button class="nav-link" id="bb-cancelled-tab" data-bs-toggle="tab" data-bs-target="#bb-cancelled" type="button" role="tab">Cancelled</button></li>
-      </ul>
-      <div class="tab-content" id="bikeBookingsTabContent">
-          <div class="tab-pane fade show active" id="bb-pending" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Bike</th><th>User ID</th><th>Full Name</th><th>Mobile</th><th>Email</th><th>Created</th><th>Status</th></tr></thead><tbody id="bookingsTableBodyPending"></tbody></table></div></div>
-          <div class="tab-pane fade" id="bb-confirmed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Bike</th><th>User ID</th><th>Full Name</th><th>Mobile</th><th>Email</th><th>Created</th><th>Status</th></tr></thead><tbody id="bookingsTableBodyConfirmed"></tbody></table></div></div>
-          <div class="tab-pane fade" id="bb-completed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Bike</th><th>User ID</th><th>Full Name</th><th>Mobile</th><th>Email</th><th>Created</th><th>Status</th></tr></thead><tbody id="bookingsTableBodyCompleted"></tbody></table></div></div>
-          <div class="tab-pane fade" id="bb-cancelled" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Bike</th><th>User ID</th><th>Full Name</th><th>Mobile</th><th>Email</th><th>Created</th><th>Status</th></tr></thead><tbody id="bookingsTableBodyCancelled"></tbody></table></div></div>
-      </div>
-  </section>
+    <!-- Bike Bookings -->
+    <section id="bookingsSection" class="page-section">
+        <h2>Bike Bookings</h2>
+        <ul class="nav nav-tabs" id="bikeBookingsTab" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link active" id="bb-pending-tab" data-bs-toggle="tab" data-bs-target="#bb-pending" type="button" role="tab">Pending</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="bb-confirmed-tab" data-bs-toggle="tab" data-bs-target="#bb-confirmed" type="button" role="tab">Confirmed</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="bb-completed-tab" data-bs-toggle="tab" data-bs-target="#bb-completed" type="button" role="tab">Completed</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="bb-cancelled-tab" data-bs-toggle="tab" data-bs-target="#bb-cancelled" type="button" role="tab">Cancelled</button></li>
+        </ul>
+        <div class="tab-content" id="bikeBookingsTabContent">
+            <div class="tab-pane fade show active" id="bb-pending" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Bike</th><th>User ID</th><th>Full Name</th><th>Mobile</th><th>Email</th><th>Created</th><th>Status</th></tr></thead><tbody id="bookingsTableBodyPending"></tbody></table></div></div>
+            <div class="tab-pane fade" id="bb-confirmed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Bike</th><th>User ID</th><th>Full Name</th><th>Mobile</th><th>Email</th><th>Created</th><th>Status</th></tr></thead><tbody id="bookingsTableBodyConfirmed"></tbody></table></div></div>
+            <div class="tab-pane fade" id="bb-completed" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Bike</th><th>User ID</th><th>Full Name</th><th>Mobile</th><th>Email</th><th>Created</th><th>Status</th></tr></thead><tbody id="bookingsTableBodyCompleted"></tbody></table></div></div>
+            <div class="tab-pane fade" id="bb-cancelled" role="tabpanel"><div class="table-responsive"><table class="table table-bordered table-striped mt-2"><thead><tr><th>ID</th><th>Bike</th><th>User ID</th><th>Full Name</th><th>Mobile</th><th>Email</th><th>Created</th><th>Status</th></tr></thead><tbody id="bookingsTableBodyCancelled"></tbody></table></div></div>
+        </div>
+    </section>
 
-  <!-- Contacts -->
-  <section id="contactsSection" class="page-section">
-    <h2>Contact Messages</h2>
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped">
-        <thead>
-          <tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Subject</th><th>Message</th><th>Submitted</th></tr>
-        </thead>
-        <tbody id="contactsTableBody"></tbody>
-      </table>
-    </div>
-  </section>
-</div>
+    <!-- Contacts -->
+    <section id="contactsSection" class="page-section">
+      <h2>Contact Messages</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Subject</th><th>Message</th><th>Submitted</th></tr>
+          </thead>
+          <tbody id="contactsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
 
 <!-- Edit Bike Modal -->
 <div class="modal fade" id="editBikeModal" tabindex="-1" aria-hidden="true">
@@ -173,19 +215,19 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-            <input type="hidden" id="editBikeId" name="id">
+            <input type="hidden" name="id">
             <div class="row g-3">
-                <div class="col-md-4"><label class="form-label">Category</label><select class="form-select" id="editBikeCategory" name="category_id" required></select></div>
-                <div class="col-md-8"><label class="form-label">Bike Name</label><input type="text" class="form-control" id="editBikeName" name="name" required></div>
-                <div class="col-md-4"><label class="form-label">Price</label><input type="text" class="form-control" id="editBikePrice" name="price"></div>
-                <div class="col-md-4"><label class="form-label">Engine</label><input type="text" class="form-control" id="editBikeEngine" name="engine"></div>
-                <div class="col-md-4"><label class="form-label">Mileage</label><input type="text" class="form-control" id="editBikeMileage" name="mileage"></div>
-                <div class="col-md-12"><label class="form-label">Features (comma-separated)</label><textarea class="form-control" id="editBikeFeatures" name="features" rows="2"></textarea></div>
+                <div class="col-md-4"><label class="form-label">Category</label><select class="form-select" name="category_id" required></select></div>
+                <div class="col-md-8"><label class="form-label">Bike Name</label><input type="text" class="form-control" name="name" required></div>
+                <div class="col-md-4"><label class="form-label">Price</label><input type="text" class="form-control" name="price"></div>
+                <div class="col-md-4"><label class="form-label">Engine</label><input type="text" class="form-control" name="engine"></div>
+                <div class="col-md-4"><label class="form-label">Mileage</label><input type="text" class="form-control" name="mileage"></div>
+                <div class="col-md-12"><label class="form-label">Features (comma-separated)</label><textarea class="form-control" name="features" rows="2"></textarea></div>
                 <div class="col-md-12">
                     <label class="form-label">Current Thumbnail</label>
                     <div class="d-flex align-items-center mb-2">
                         <img id="editBikeThumbnailPreview" src="" alt="Thumbnail" class="me-3" style="width: 80px; height: auto; display: none;">
-                        <input type="text" class="form-control" id="editBikeThumbnail" name="thumbnail" readonly>
+                        <input type="text" class="form-control" name="thumbnail" readonly>
                     </div>
                 </div>
                 <div class="col-md-12">
@@ -200,6 +242,39 @@
           <button type="submit" class="btn btn-success">Update Bike</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="confirmationModalBody">
+        Are you sure you want to proceed?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteButton">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+  <div id="newBookingToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <i class="fas fa-bell me-2"></i>
+      <strong class="me-auto">New Booking!</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="newBookingToastBody">
+      A new booking has just been received.
     </div>
   </div>
 </div>

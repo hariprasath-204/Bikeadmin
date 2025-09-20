@@ -46,7 +46,6 @@ db.getConnection()
 // ----------------------
 // Multer File Upload Setup
 // ----------------------
-// Corrected path to use a simple 'images' folder in the root directory
 const imagesDir = path.join(__dirname, "images");
 fs.mkdirSync(imagesDir, { recursive: true });
 
@@ -55,8 +54,7 @@ const storage = multer.diskStorage({
         cb(null, imagesDir);
     },
     filename: (req, file, cb) => {
-        // Use a timestamp to prevent file name conflicts
-        cb(null, Date.now() + '-' + file.originalname);
+        cb(null, file.originalname);
     }
 });
 
@@ -96,6 +94,51 @@ app.get("/api/dashboard", async (req, res) => {
         const [[{ total: contacts }]] = await db.query("SELECT COUNT(*) as total FROM contact_messages");
         res.json({ users, bikes, testDrives, serviceBookings, bikeBookings, contacts });
     } catch (err) {
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
+app.get("/api/booking-stats", async (req, res) => {
+    try {
+        const tables = ['bookings', 'testdrive_bookings', 'service_bookings'];
+        let totals = { pending: 0, confirmed: 0, completed: 0, cancelled: 0 };
+        for (const table of tables) {
+            const [results] = await db.query(`SELECT status, COUNT(*) as count FROM ${table} GROUP BY status`);
+            results.forEach(row => {
+                if (totals.hasOwnProperty(row.status)) {
+                    totals[row.status] += row.count;
+                }
+            });
+        }
+        res.json(totals);
+    } catch (err) {
+        console.error("Error fetching booking stats:", err);
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
+app.get("/api/recent-testdrives", async (req, res) => {
+    try {
+        const [results] = await db.query("SELECT booking_id, full_name, bike_model, preferred_date, status FROM testdrive_bookings ORDER BY booking_id DESC LIMIT 5");
+        res.json(results);
+    } catch (err) {
+        console.error("Error fetching recent test drives:", err);
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
+app.get("/api/check-new-bookings", async (req, res) => {
+    try {
+        const [testDriveResult] = await db.query("SELECT MAX(booking_id) as max_id FROM testdrive_bookings");
+        const [serviceResult] = await db.query("SELECT MAX(booking_id) as max_id FROM service_bookings");
+        const [bikeResult] = await db.query("SELECT MAX(booking_id) as max_id FROM bookings");
+        res.json({
+            latestTestDriveId: testDriveResult[0].max_id || 0,
+            latestServiceId: serviceResult[0].max_id || 0,
+            latestBikeId: bikeResult[0].max_id || 0
+        });
+    } catch (err) {
+        console.error("Error checking for new bookings:", err);
         res.status(500).json({ error: "Database error" });
     }
 });
@@ -174,11 +217,10 @@ app.post("/api/bikes", upload.single('thumbnailFile'), async (req, res) => {
 app.put("/api/bikes/:id", upload.single('thumbnailFile'), async (req, res) => {
     const { category_id, name, price, engine, mileage, features } = req.body;
     const id = req.params.id;
-    let newThumbnail = req.body.thumbnail; // Keep old thumbnail by default
+    let newThumbnail = req.body.thumbnail; 
 
     if (req.file) {
         newThumbnail = req.file.filename;
-        // If there was an old thumbnail, try to delete it
         if (req.body.thumbnail) { 
             fs.unlink(path.join(imagesDir, req.body.thumbnail), (err) => {
                 if (err) console.error("Error deleting old thumbnail file:", err);
@@ -215,7 +257,22 @@ app.delete("/api/bikes/:id", async (req, res) => {
     }
 });
 
-// ... (rest of the booking and contact routes remain the same)
+app.post("/api/bike-images", upload.array("images"), async (req, res) => {
+    const { bikeId } = req.body;
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: "No images uploaded" });
+    }
+    try {
+        const insertPromises = req.files.map(file => {
+            return db.query("INSERT INTO bike_images (bike_id, image_url) VALUES (?, ?)", [bikeId, file.filename]);
+        });
+        await Promise.all(insertPromises);
+        res.json({ success: true, message: "Images uploaded successfully" });
+    } catch (err) {
+        console.error("Error uploading additional images:", err)
+        res.status(500).json({ error: "Server error while uploading images" });
+    }
+});
 
 // --- BOOKINGS (TEST DRIVE, SERVICE, BIKE) ---
 const bookingRoutes = [
