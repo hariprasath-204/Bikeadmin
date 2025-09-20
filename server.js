@@ -16,11 +16,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, "public")));
-
-
 
 // ----------------------
 // MySQL Connection Pool
@@ -31,11 +27,10 @@ const db = mysql.createPool({
     user: process.env.DB_USER || "29AbDUEYRffWpr9.root",
     password: process.env.DB_PASS || "Y6CltcwzarqPh1ga",
     database: process.env.DB_NAME || "rkbikes",
-    port: process.env.DB_PORT || 4000, // TiDB Cloud default
-    ssl: { rejectUnauthorized: true }, // ✅ required for TiDB
+    port: process.env.DB_PORT || 4000,
+    ssl: { rejectUnauthorized: true },
 });
 
-// Test the connection
 db.getConnection()
     .then(conn => {
         console.log("✅ Connected to MySQL Database");
@@ -57,39 +52,18 @@ const storage = multer.diskStorage({
         cb(null, imagesDir);
     },
     filename: (req, file, cb) => {
-        cb(null, file.originalname);
+        // Use a timestamp to prevent file name conflicts
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
 const upload = multer({ storage });
 
 // ----------------------
-// Helper Function for Features
-// ----------------------
-const processFeatures = async (bikeId, featuresString) => {
-    // First, delete all existing features for this bike to ensure a clean update
-    await db.query("DELETE FROM bike_features WHERE bike_id = ?", [bikeId]);
-
-    // If a non-empty features string is provided, insert the new features
-    if (featuresString && featuresString.trim() !== "") {
-        const featureList = featuresString.split(',').map(f => f.trim()).filter(f => f); // a, b, ,, c -> ['a', 'b', 'c']
-        if (featureList.length > 0) {
-            const featurePromises = featureList.map(feature => {
-                return db.query("INSERT INTO bike_features (bike_id, feature) VALUES (?, ?)", [bikeId, feature]);
-            });
-            await Promise.all(featurePromises);
-        }
-    }
-};
-
-
-// ----------------------
 // API Endpoints
 // ----------------------
-app.use(express.static(__dirname));
-// Root Route → Send index.html
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+    res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // --- DASHBOARD ---
@@ -101,7 +75,6 @@ app.get("/api/dashboard", async (req, res) => {
         const [[{ total: serviceBookings }]] = await db.query("SELECT COUNT(*) as total FROM service_bookings");
         const [[{ total: bikeBookings }]] = await db.query("SELECT COUNT(*) as total FROM bookings");
         const [[{ total: contacts }]] = await db.query("SELECT COUNT(*) as total FROM contact_messages");
-
         res.json({ users, bikes, testDrives, serviceBookings, bikeBookings, contacts });
     } catch (err) {
         res.status(500).json({ error: "Database error" });
@@ -156,6 +129,7 @@ app.get("/api/bikes", async (req, res) => {
     }
 });
 
+// ✅ FINAL VERSION: This route now returns the full new bike object upon creation.
 app.post("/api/bikes", upload.single('thumbnailFile'), async (req, res) => {
     const { category_id, name, price, engine, mileage, features } = req.body;
     const thumbnail = req.file ? req.file.filename : null;
@@ -164,17 +138,44 @@ app.post("/api/bikes", upload.single('thumbnailFile'), async (req, res) => {
         return res.status(400).json({ error: "Category and name are required" });
     }
 
+    const connection = await db.getConnection();
     try {
-        const sql = `INSERT INTO bikes (category_id, name, price, engine, mileage, thumbnail) VALUES (?, ?, ?, ?, ?, ?)`;
-        const [result] = await db.query(sql, [category_id, name, price, engine, mileage, thumbnail]);
-        
-        // Process features for the newly created bike
-        await processFeatures(result.insertId, features);
+        await connection.beginTransaction();
 
-        res.status(201).json({ message: "Bike and features added successfully", bikeId: result.insertId });
+        const insertSql = `INSERT INTO bikes (category_id, name, price, engine, mileage, thumbnail) VALUES (?, ?, ?, ?, ?, ?)`;
+        const [result] = await connection.query(insertSql, [category_id, name, price, engine, mileage, thumbnail]);
+        const newBikeId = result.insertId;
+
+        if (features && features.trim() !== "") {
+            const featureList = features.split(',').map(f => f.trim()).filter(f => f);
+            if (featureList.length > 0) {
+                const featurePromises = featureList.map(feature => {
+                    return connection.query("INSERT INTO bike_features (bike_id, feature) VALUES (?, ?)", [newBikeId, feature]);
+                });
+                await Promise.all(featurePromises);
+            }
+        }
+
+        const selectSql = `
+            SELECT 
+                b.id, b.category_id, c.name AS category_name, b.name, 
+                b.price, b.engine, b.mileage, b.thumbnail,
+                (SELECT GROUP_CONCAT(f.feature SEPARATOR ', ') FROM bike_features f WHERE f.bike_id = b.id) AS features
+            FROM bikes b 
+            LEFT JOIN categories c ON b.category_id = c.id
+            WHERE b.id = ?
+            GROUP BY b.id`;
+        const [[newBike]] = await connection.query(selectSql, [newBikeId]);
+
+        await connection.commit();
+        res.status(201).json(newBike);
+
     } catch (err) {
+        await connection.rollback();
         console.error("Error adding bike:", err);
         res.status(500).json({ error: "Failed to add bike" });
+    } finally {
+        connection.release();
     }
 });
 
@@ -193,12 +194,19 @@ app.put("/api/bikes/:id", upload.single('thumbnailFile'), async (req, res) => {
     }
 
     try {
-        // Update bike details
         const sql = `UPDATE bikes SET category_id=?, name=?, price=?, engine=?, mileage=?, thumbnail=? WHERE id=?`;
         await db.query(sql, [category_id, name, price, engine, mileage, newThumbnail, id]);
 
-        // Process features for the updated bike
-        await processFeatures(id, features);
+        await db.query("DELETE FROM bike_features WHERE bike_id = ?", [id]);
+        if (features && features.trim() !== "") {
+            const featureList = features.split(',').map(f => f.trim()).filter(f => f);
+            if (featureList.length > 0) {
+                const featurePromises = featureList.map(feature => {
+                    return db.query("INSERT INTO bike_features (bike_id, feature) VALUES (?, ?)", [id, feature]);
+                });
+                await Promise.all(featurePromises);
+            }
+        }
 
         res.json({ success: true, message: "Bike and features updated successfully" });
     } catch (err) {
@@ -284,7 +292,5 @@ app.get("/api/contact-messages", async (req, res) => {
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
 });
-
-
