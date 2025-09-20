@@ -28,7 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Data Loaders ---
     const fetchData = async (endpoint) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/${endpoint}`);
+            // ✅ MODIFICATION: Added { cache: 'no-cache' } to prevent browser caching
+            const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, {
+                cache: 'no-cache'
+            });
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return await response.json();
         } catch (error) {
@@ -321,4 +324,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initialize();
 });
-
