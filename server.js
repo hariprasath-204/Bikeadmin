@@ -7,6 +7,7 @@ const cors = require("cors");
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
+const nodemailer = require("nodemailer"); // Added for sending emails
 require("dotenv").config();
 
 // ----------------------
@@ -42,6 +43,26 @@ db.getConnection()
         console.error("❌ MySQL Connection Failed:", err);
         process.exit(1);
     });
+
+// ----------------------
+// Nodemailer Config
+// ----------------------
+const transporter = nodemailer.createTransport({
+  service: "gmail", // or your email provider
+  auth: {
+    user: process.env.EMAIL_USER || "bikeshowroom162@gmail.com",
+    pass: process.env.EMAIL_PASS || "diwa zezm dues wcdu", // Use an App Password for Gmail
+  },
+});
+
+transporter.verify(function(error, success) {
+  if (error) {
+    console.error("❌ Nodemailer configuration error:", error);
+  } else {
+    console.log("✅ Nodemailer is ready to send emails");
+  }
+});
+
 
 // ----------------------
 // Multer File Upload Setup
@@ -276,11 +297,13 @@ app.post("/api/bike-images", upload.array("images"), async (req, res) => {
 
 // --- BOOKINGS (TEST DRIVE, SERVICE, BIKE) ---
 const bookingRoutes = [
-    { name: 'testdrive', table: 'testdrive_bookings' },
-    { name: 'service', table: 'service_bookings' },
-    { name: 'bike', table: 'bookings' }
+    { name: 'testdrive', table: 'testdrive_bookings', title: 'Test Drive' },
+    { name: 'service', table: 'service_bookings', title: 'Service' },
+    { name: 'bike', table: 'bookings', title: 'Bike Purchase' }
 ];
-bookingRoutes.forEach(({ name, table }) => {
+
+bookingRoutes.forEach(({ name, table, title }) => {
+    // GET all bookings of a certain type
     app.get(`/api/${name}-bookings`, async (req, res) => {
         try {
             const [results] = await db.query(`SELECT * FROM ${table} ORDER BY booking_id DESC`);
@@ -289,13 +312,54 @@ bookingRoutes.forEach(({ name, table }) => {
             res.status(500).json({ error: err.message });
         }
     });
+
+    // UPDATE a booking's status and send an email
     app.put(`/api/${name}-bookings/:id`, async (req, res) => {
         const { status } = req.body;
+        const { id } = req.params;
         try {
-            await db.query(`UPDATE ${table} SET status = ? WHERE booking_id = ?`, [status, req.params.id]);
-            res.json({ success: true });
+            // 1. Update the status in the database
+            await db.query(`UPDATE ${table} SET status = ? WHERE booking_id = ?`, [status, id]);
+
+            // 2. Fetch booking details to get the user's email and name
+            const [[booking]] = await db.query(`SELECT * FROM ${table} WHERE booking_id = ?`, [id]);
+
+            // 3. If the booking and email exist, send a notification
+            if (booking && booking.email) {
+                const mailOptions = {
+                    from: '"R.K. Bikes" <bikeshowroom162@gmail.com>',
+                    to: booking.email,
+                    subject: `Status Update for your ${title} Booking (#${booking.booking_id})`,
+                    html: `
+                        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                            <h2 style="color: #333;">Booking Status Updated</h2>
+                            <p>Dear ${booking.full_name},</p>
+                            <p>This is an update regarding your ${title} booking with R.K. Bikes.</p>
+                            <p>Your booking <strong>#${booking.booking_id}</strong> has been updated to the following status: 
+                                <span style="background-color: #eee; padding: 3px 6px; border-radius: 4px; font-weight: bold;">${status.toUpperCase()}</span>.
+                            </p>
+                            <p>Thank you for choosing us.</p>
+                            <br>
+                            <p>Best Regards,<br>The R.K. Bikes Team</p>
+                        </div>
+                    `,
+                };
+
+                // Send the email
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        // Log the error but don't block the API response
+                        console.error(`Failed to send email for booking ${id}:`, error);
+                    } else {
+                        console.log(`Email sent for booking ${id}: ${info.response}`);
+                    }
+                });
+            }
+
+            res.json({ success: true, message: "Status updated successfully." });
         } catch (err) {
-            res.status(500).json({ error: err.message });
+            console.error(`Error updating ${name} booking:`, err);
+            res.status(500).json({ error: `Failed to update ${name} booking.` });
         }
     });
 });
@@ -318,4 +382,3 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
